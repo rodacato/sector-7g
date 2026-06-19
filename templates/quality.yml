@@ -1,0 +1,22 @@
+# Standard quality + security gate. Copy to .github/workflows/quality.yml in an app.
+# Calls the reusable workflows in rodacato/sector-7g. Update there → this inherits it.
+name: quality
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master, main, production]
+  pull_request:
+
+jobs:
+  security:
+    uses: rodacato/sector-7g/.github/workflows/security.yml@master
+    # with:
+    #   blocking: false   # start in report-only mode; flip to true (or remove) to enforce
+
+  sonar:
+    uses: rodacato/sector-7g/.github/workflows/sonar.yml@master
+    with:
+      host_url: ${{ vars.SONAR_HOST_URL }}
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

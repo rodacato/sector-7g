@@ -1,0 +1,76 @@
+name: security (reusable)
+
+# Standard, language-agnostic security inspection shared by all rodacato projects.
+# Call it from an app via templates/quality.yml. Update here → every repo inherits it.
+#
+# Conventions (keep new workflows consistent with these):
+#   - actions pinned to a fixed tag (Dependabot bumps them — see .github/dependabot.yml)
+#   - a `blocking` input so repos can start in report-only mode, then enforce
+#   - one job per tool so failures are isolated and readable
+
+on:
+  workflow_call:
+    inputs:
+      semgrep_config:
+        description: Space-separated Semgrep rulesets.
+        type: string
+        default: "p/default p/security-audit"
+      trivy_severity:
+        description: Comma-separated severities Trivy fails on.
+        type: string
+        default: "HIGH,CRITICAL"
+      blocking:
+        description: If false, findings are reported but don't fail the job.
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  semgrep:
+    name: semgrep (SAST)
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan
+        continue-on-error: ${{ !inputs.blocking }}
+        run: |
+          set -eu
+          configs=""
+          for c in ${{ inputs.semgrep_config }}; do configs="$configs --config $c"; done
+          semgrep scan $configs --error
+
+  trivy:
+    name: trivy (deps + secrets + IaC)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        continue-on-error: ${{ !inputs.blocking }}
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: ${{ inputs.trivy_severity }}
+          ignore-unfixed: true
+          exit-code: "1"
+
+  gitleaks:
+    name: gitleaks (secret scan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan
+        uses: gitleaks/gitleaks-action@v3
+        continue-on-error: ${{ !inputs.blocking }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # gitleaks-action is free for personal accounts. GitHub *organizations*
+          # need a free GITLEAKS_LICENSE — set it as a secret if you ever move repos
+          # into an org.

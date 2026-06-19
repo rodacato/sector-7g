@@ -1,0 +1,40 @@
+# Standard Dependabot config. Copy to .github/dependabot.yml in an app.
+# Dependabot config is per-repo by design (can't be centralized) — this template
+# keeps the shape identical across repos. Uncomment the ecosystems this repo uses.
+version: 2
+updates:
+  # GitHub Actions used by this repo's own workflows. Left ON for every repo.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+
+  # Rails / Ruby
+  # - package-ecosystem: bundler
+  #   directory: "/"
+  #   schedule: { interval: weekly }
+
+  # Node / Express / TS  (use directory of the manifest; for monorepos add one per workspace)
+  # - package-ecosystem: npm
+  #   directory: "/"
+  #   schedule: { interval: weekly }
+
+  # Go
+  # - package-ecosystem: gomod
+  #   directory: "/"
+  #   schedule: { interval: weekly }
+
+  # Python
+  # - package-ecosystem: pip
+  #   directory: "/"
+  #   schedule: { interval: weekly }
+
+  # Rust
+  # - package-ecosystem: cargo
+  #   directory: "/"
+  #   schedule: { interval: weekly }
+
+  # Dockerfiles
+  # - package-ecosystem: docker
+  #   directory: "/"
+  #   schedule: { interval: weekly }
