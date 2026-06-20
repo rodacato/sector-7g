@@ -1,0 +1,22 @@
+name: SonarQube scan
+description: >-
+  Run the standard rodacato SonarQube scan, pinned to one scanner version.
+  The caller checks out the repo (fetch-depth: 0) and generates the coverage
+  report before this step — coverage is stack-specific, the scan is not.
+
+inputs:
+  host_url:
+    description: SonarQube base URL (pass vars.SONAR_HOST_URL).
+    required: true
+  token:
+    description: SonarQube analysis token (pass secrets.SONAR_TOKEN).
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: SonarQube scan
+      uses: sonarsource/sonarqube-scan-action@v8.2.0
+      env:
+        SONAR_HOST_URL: ${{ inputs.host_url }}
+        SONAR_TOKEN: ${{ inputs.token }}
