@@ -18,7 +18,11 @@ Companion to **andys-room**:
 | Workflow | What it runs | Languages |
 |---|---|---|
 | `security.yml` | Semgrep (SAST) · Trivy (deps/secrets/IaC) · Gitleaks (secrets) | any |
-| `sonar.yml` | SonarQube scan | any (multi-language) |
+
+### Available — composite actions
+| Action | What it runs | Languages |
+|---|---|---|
+| `sonar-scan` | SonarQube scan — caller checks out (`fetch-depth: 0`) and generates coverage first; the action standardizes the scan step | any (multi-language) |
 
 ### Planned
 - **`kamal-deploy`** — a *composite action* wrapping the shared Kamal deploy

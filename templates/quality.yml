@@ -18,8 +18,24 @@ jobs:
     # Manual-only for now: runs on "Run workflow", not on every push/PR.
     # Remove this `if` to scan automatically on the default branch.
     if: ${{ github.event_name == 'workflow_dispatch' }}
-    uses: rodacato/sector-7g/.github/workflows/sonar.yml@master
-    with:
-      host_url: ${{ vars.SONAR_HOST_URL }}
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history → accurate "new code" / blame dates
+
+      # Stack-specific: install deps + run tests so coverage lands where
+      # sonar-project.properties expects it (SimpleCov → coverage/.resultset.json,
+      # Node → coverage/lcov.info). Replace with your stack's steps. Example (Rails):
+      # - uses: ruby/setup-ruby@v1
+      #   with: { bundler-cache: true }
+      # - run: bin/rails db:test:prepare && bundle exec rspec
+
+      - name: SonarQube scan
+        uses: rodacato/sector-7g/actions/sonar-scan@master
+        with:
+          host_url: ${{ vars.SONAR_HOST_URL }}
+          token: ${{ secrets.SONAR_TOKEN }}
+          # project_base_dir: apps/backend   # monorepo: scan one workspace per Sonar project
+          # project_version: ${{ github.ref_name }}   # override the default (commit SHA)
