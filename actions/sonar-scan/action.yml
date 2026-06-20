@@ -18,6 +18,13 @@ inputs:
       per app keeps the JS/TS analyzer's memory footprint down). Defaults to repo root.
     required: false
     default: "."
+  project_version:
+    description: >-
+      Value reported as sonar.projectVersion. Defaults to the commit SHA of
+      the consuming repo's workflow run, matching the Sentry release scheme.
+      Override to pass a tag or semantic version.
+    required: false
+    default: ${{ github.sha }}
 
 runs:
   using: composite
@@ -26,6 +33,7 @@ runs:
       uses: sonarsource/sonarqube-scan-action@v8.2.0
       with:
         projectBaseDir: ${{ inputs.project_base_dir }}
+        args: -Dsonar.projectVersion=${{ inputs.project_version }}
       env:
         SONAR_HOST_URL: ${{ inputs.host_url }}
         SONAR_TOKEN: ${{ inputs.token }}
