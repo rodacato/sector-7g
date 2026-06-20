@@ -1,6 +1,6 @@
 # Standard quality + security gate. Copy to .github/workflows/quality.yml in an app.
 # Calls the reusable workflows in rodacato/sector-7g. Update there → this inherits it.
-name: quality
+name: Sector 7g - Quality
 
 on:
   workflow_dispatch:
@@ -15,6 +15,9 @@ jobs:
     #   blocking: false   # start in report-only mode; flip to true (or remove) to enforce
 
   sonar:
+    # Manual-only for now: runs on "Run workflow", not on every push/PR.
+    # Remove this `if` to scan automatically on the default branch.
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     uses: rodacato/sector-7g/.github/workflows/sonar.yml@master
     with:
       host_url: ${{ vars.SONAR_HOST_URL }}
