@@ -34,7 +34,7 @@ jobs:
     container:
       image: semgrep/semgrep
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Scan
         continue-on-error: ${{ !inputs.blocking }}
         run: |
@@ -47,7 +47,7 @@ jobs:
     name: trivy (deps + secrets + IaC)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Scan
         uses: aquasecurity/trivy-action@v0.36.0
         continue-on-error: ${{ !inputs.blocking }}
@@ -63,7 +63,7 @@ jobs:
     name: gitleaks (secret scan)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Scan
