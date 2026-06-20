@@ -1,0 +1,7 @@
+# kwik-e-mart workspace (personal AI memory + .local overrides — never committed)
+.kwik-e/
+CLAUDE.local.md
+.claude/rules/kwik-e/
+
+# OS / editor cruft
+.DS_Store
