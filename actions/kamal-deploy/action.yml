@@ -1,0 +1,120 @@
+name: Kamal deploy
+description: >-
+  Run the standard rodacato Kamal deploy step, pinned to one Kamal + Ruby version.
+  The caller checks out the repo and sets the app's env/secrets at job level (Kamal
+  reads them from deploy.yml via ERB/ENV); this action standardizes the steps only —
+  Ruby + Kamal install, Buildx, ssh-agent, known_hosts, accessory boot/reboot, and the
+  kamal command itself. The app keeps its env and topology; one config file per call.
+
+inputs:
+  action:
+    description: "Kamal command to run: deploy | setup | redeploy."
+    required: false
+    default: deploy
+  config-file:
+    description: Kamal config file to deploy (one service per call).
+    required: false
+    default: config/deploy.yml
+  ssh-private-key:
+    description: SSH private key for the deploy user (pass secrets.SSH_PRIVATE_KEY).
+    required: true
+  host:
+    description: >-
+      VPS host/IP added to known_hosts before deploy. Skipped when empty (rely on
+      Kamal's own host-key handling instead).
+    required: false
+    default: ""
+  ruby-version:
+    description: Ruby version used to run Kamal.
+    required: false
+    default: "3.3"
+  kamal-version:
+    description: >-
+      Kamal gem version constraint installed before deploy (e.g. "~> 2.7"). Set to
+      "bundled" for a Ruby app that ships Kamal in its Gemfile — that enables
+      bundler-cache, skips the standalone gem install, and runs Kamal via bin/kamal.
+    required: false
+    default: "~> 2.7"
+  boot-accessories:
+    description: >-
+      Boot Kamal accessories before deploy (idempotent). Always skipped when action is
+      setup (setup boots them itself). Set "false" for a service with no accessories.
+    required: false
+    default: "true"
+  reboot-accessories:
+    description: >-
+      Space-separated accessory names to reboot (stop+rm+run) after a successful deploy,
+      to pick up config drift in their env/cmd/options that an idempotent boot ignores.
+      Skipped on setup. Empty by default.
+    required: false
+    default: ""
+  dockerhub-username:
+    description: >-
+      Docker Hub user to authenticate as before deploy, to dodge anonymous base-image
+      pull rate limits. Skipped when empty. Pair with dockerhub-token.
+    required: false
+    default: ""
+  dockerhub-token:
+    description: Docker Hub access token (pair with dockerhub-username).
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve Kamal binary
+      shell: bash
+      run: |
+        if [ "${{ inputs.kamal-version }}" = "bundled" ]; then
+          echo "KAMAL_BIN=bin/kamal" >> "$GITHUB_ENV"
+        else
+          echo "KAMAL_BIN=kamal" >> "$GITHUB_ENV"
+        fi
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ inputs.ruby-version }}
+        bundler-cache: ${{ inputs.kamal-version == 'bundled' }}
+
+    - name: Install Kamal
+      if: ${{ inputs.kamal-version != 'bundled' }}
+      shell: bash
+      run: gem install kamal -v "${{ inputs.kamal-version }}"
+
+    - name: Log in to Docker Hub
+      if: ${{ inputs.dockerhub-username != '' }}
+      uses: docker/login-action@v4
+      with:
+        username: ${{ inputs.dockerhub-username }}
+        password: ${{ inputs.dockerhub-token }}
+
+    - name: Set up Buildx
+      uses: docker/setup-buildx-action@v4
+
+    - name: Start SSH agent
+      uses: webfactory/ssh-agent@v0.10.0
+      with:
+        ssh-private-key: ${{ inputs.ssh-private-key }}
+
+    - name: Add host to known_hosts
+      if: ${{ inputs.host != '' }}
+      shell: bash
+      run: ssh-keyscan "${{ inputs.host }}" >> ~/.ssh/known_hosts
+
+    - name: Boot accessories
+      if: ${{ inputs.boot-accessories == 'true' && inputs.action != 'setup' }}
+      shell: bash
+      run: $KAMAL_BIN accessory boot all --config-file "${{ inputs.config-file }}" || true
+
+    - name: Run kamal ${{ inputs.action }}
+      shell: bash
+      run: $KAMAL_BIN "${{ inputs.action }}" --config-file "${{ inputs.config-file }}"
+
+    - name: Reboot accessories
+      if: ${{ inputs.reboot-accessories != '' && inputs.action != 'setup' }}
+      shell: bash
+      run: |
+        for accessory in ${{ inputs.reboot-accessories }}; do
+          printf 'y\n' | $KAMAL_BIN accessory reboot "$accessory" --config-file "${{ inputs.config-file }}"
+        done
