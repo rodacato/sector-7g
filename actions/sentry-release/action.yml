@@ -1,0 +1,46 @@
+name: Sentry release
+description: >-
+  Create a Sentry (or GlitchTip) release and mark the deploy, gated on an auth token.
+  No-op when sentry-auth-token is empty, so any repo can call it unconditionally as the
+  last step of its deploy flow — it activates only once the token is set. Not tied to
+  Kamal, so non-container deploys (EAS, Pages) can reuse it too.
+
+inputs:
+  sentry-auth-token:
+    description: >-
+      Sentry/GlitchTip auth token (pass secrets.SENTRY_AUTH_TOKEN). Empty disables the
+      step entirely.
+    required: false
+    default: ""
+  org:
+    description: Sentry/GlitchTip organization slug (pass vars.SENTRY_ORG).
+    required: false
+    default: ""
+  project:
+    description: Sentry/GlitchTip project slug (pass vars.SENTRY_PROJECT).
+    required: false
+    default: ""
+  environment:
+    description: Deploy environment recorded on the release.
+    required: false
+    default: production
+  version:
+    description: >-
+      Release version. Defaults to the commit SHA, matching the SENTRY_RELEASE scheme
+      the apps already bake into their images and the sonar-scan projectVersion default.
+    required: false
+    default: ${{ github.sha }}
+
+runs:
+  using: composite
+  steps:
+    - name: Create Sentry release
+      if: ${{ inputs.sentry-auth-token != '' }}
+      uses: getsentry/action-release@v3
+      env:
+        SENTRY_AUTH_TOKEN: ${{ inputs.sentry-auth-token }}
+        SENTRY_ORG: ${{ inputs.org }}
+        SENTRY_PROJECT: ${{ inputs.project }}
+      with:
+        environment: ${{ inputs.environment }}
+        version: ${{ inputs.version }}

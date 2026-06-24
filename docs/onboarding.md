@@ -47,8 +47,11 @@ pinned and consistent. Keep stack-specific jobs (tests, lint, framework audits, 
 
 | Repo | quality.yml | dependabot | sonar project | dropped dup scans |
 |---|---|---|---|---|
-| stockerly | ☐ | ☐ | ☐ | ☐ (security.yml + ci scan_vulnerabilities) |
-| drawhaus | ☐ | ☐ | ☐ | ☐ |
-| dojo | ☐ | ☐ | ☐ | ☐ |
+| stockerly | ☑ | ☑ | ☑ | ☑ (Trivy → sector-7g; Brakeman/bundler-audit kept) |
+| drawhaus | ☑ | ☑ | ☑ | ☑ |
+| dojo | ☑ | ☑ | ☑ | ☑ |
+| mi-feria | ☑ | ☑ | ☑ | ☑ |
 
-Keep this table updated as repos are onboarded.
+All four are onboarded to the security + sonar gate. Keep this table updated as repos are
+onboarded. (The *deploy* standardization — `kamal-deploy` / `sentry-release` — is tracked
+separately; see [usage.md](usage.md).)

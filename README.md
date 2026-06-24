@@ -12,6 +12,12 @@ Companion to **andys-room**:
 - **andys-room** = the *host* substrate (the VPS + services like SonarQube, GlitchTip).
 - **sector-7g** = the *CI / quality* substrate (this repo).
 
+**Standalone — no extra tooling required.** Everything here is consumed two ways: by
+GitHub reference (`uses: rodacato/sector-7g/...@master`) and by copying `templates/`.
+That's it — no CLI, no submodule, no `kwik-e-mart`. Any repo (yours or not) can adopt a
+flow with a thin caller. The `/quality-sweep` and `kamal-deploy` *skills* in `kwik-e-mart`
+are an optional convenience that automates adoption; the flows work the same without them.
+
 ## Catalog
 
 ### Available — reusable workflows
@@ -23,13 +29,10 @@ Companion to **andys-room**:
 | Action | What it runs | Languages |
 |---|---|---|
 | `sonar-scan` | SonarQube scan — caller checks out (`fetch-depth: 0`) and generates coverage first; the action standardizes the scan step | any (multi-language) |
+| `kamal-deploy` | One Kamal deploy step (Ruby + Kamal install, Buildx, ssh-agent, known_hosts, accessory boot/reboot, `kamal <action>`). Caller sets the app's `env:`; the action standardizes the steps. One config file per call | any (Kamal) |
+| `sentry-release` | Create a Sentry/GlitchTip release + mark the deploy. No-op without an auth token, so it's safe to call unconditionally. Not Kamal-specific | any |
 
 ### Planned
-- **`kamal-deploy`** — a *composite action* wrapping the shared Kamal deploy
-  boilerplate (the 8 conventions: `setup`/`deploy`/`redeploy` dispatch, ssh-agent,
-  accessory boot, pinned tool versions). A composite action, **not** a reusable
-  workflow, because each app's `env:` set and service topology are its own — the
-  action standardizes the *steps*, the app keeps its env. Shrinks every `deploy.yml`.
 - **`release`** — changelog / release tagging.
 
 ## Onboard a repo

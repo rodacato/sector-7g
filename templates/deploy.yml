@@ -1,0 +1,66 @@
+# Standard Kamal deploy. Copy to .github/workflows/deploy.yml in an app and tailor.
+# Uses the kamal-deploy + sentry-release composite actions in rodacato/sector-7g.
+# Update there → this inherits it. The action standardizes the STEPS; this caller keeps
+# the app's env, secrets, and topology. See docs/usage.md for inputs.
+name: Deploy
+
+on:
+  push:
+    branches: [production]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Kamal command (default `deploy`; `setup` for first-time host bootstrap)"
+        type: choice
+        options: [deploy, setup, redeploy]
+        default: deploy
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  deploy:
+    name: Deploy (${{ inputs.action || 'deploy' }})
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 20
+    env:
+      ACTION: ${{ inputs.action || 'deploy' }}
+      KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+      # --- App env Kamal reads from config/deploy.yml (ERB/ENV). Fill in per app. ---
+      HOST_IP: ${{ secrets.HOST_IP }}
+      # DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      # SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
+      # SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      # ...
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: rodacato/sector-7g/actions/kamal-deploy@master
+        with:
+          action: ${{ env.ACTION }}
+          # config-file: config/deploy.yml      # default; set per service for monorepos
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.HOST_IP }}
+          ruby-version: "3.3"
+          kamal-version: "~> 2.7"               # or `bundled` for a Rails app with Kamal in its Gemfile
+          # boot-accessories: "false"           # set for a service with no accessories
+          # reboot-accessories: piston          # space-separated names to reboot after deploy
+          # dockerhub-username: ${{ vars.DOCKERHUB_USERNAME }}   # dodge base-image pull limits
+          # dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Optional: no-op until SENTRY_AUTH_TOKEN is set. Safe to leave in.
+      - uses: rodacato/sector-7g/actions/sentry-release@master
+        with:
+          sentry-auth-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          org: ${{ vars.SENTRY_ORG }}
+          project: ${{ vars.SENTRY_PROJECT }}
+
+  # --- Multi-service: duplicate the job per service, chain with `needs:`, and point each
+  # at its own config-file (config/deploy.api.yml, config/deploy.web.yml). Build images
+  # outside Kamal (docker/build-push-action) in separate jobs if that's your pattern. ---
