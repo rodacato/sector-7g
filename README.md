@@ -56,6 +56,9 @@ procedure in [docs/onboarding.md](docs/onboarding.md).
 - Provide a **`blocking` input** where it makes sense, so repos can adopt in
   report-only mode first, then enforce.
 - **Name by purpose** (`security`, `sonar`, `kamal-deploy`), one tool per job.
+- **Caller workflows carry the `Sector 7g - ` name prefix** (`Sector 7g - Quality`,
+  `Sector 7g - Deploy`) so every sector-7g-powered flow groups together in the Actions
+  tab. The `name:` field only — the file name stays purpose-based.
 - **Callers stay thin** — they pass inputs/secrets, nothing else.
 
 ## Add or update a flow

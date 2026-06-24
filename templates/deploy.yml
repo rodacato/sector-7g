@@ -2,7 +2,7 @@
 # Uses the kamal-deploy + sentry-release composite actions in rodacato/sector-7g.
 # Update there → this inherits it. The action standardizes the STEPS; this caller keeps
 # the app's env, secrets, and topology. See docs/usage.md for inputs.
-name: Deploy
+name: Sector 7g - Deploy
 
 on:
   push:
