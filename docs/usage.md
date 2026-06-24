@@ -28,6 +28,7 @@ needs to freeze a known-good version.
 | `sonar-scan` | composite action | reference (+ `sonar-project.properties`) | the SonarQube scan step |
 | `kamal-deploy` | composite action | reference | the Kamal deploy steps |
 | `sentry-release` | composite action | reference | release tagging on deploy |
+| `smoke.yml` | template | copy + fill | the manual smoke run shape |
 
 **Reusable workflow vs composite action — why each is what it is:**
 - A **reusable workflow** owns a whole job and runs identically everywhere (security
@@ -197,6 +198,22 @@ Scope note: this is **release tracking** (post-deploy). **Source-map upload** ha
 build time (in the Dockerfile / build step) and stays there — don't move it here.
 
 ---
+
+## `smoke.yml` — manual smoke run (template)
+
+A **template**, not an action — the shape is shared but the test runtime and specs are
+per-stack (Playwright, Capybara, curl checks…). Copy `templates/smoke.yml` to
+`.github/workflows/smoke.yml` and fill the two stack-specific blocks (setup + run).
+
+- **Manual-only** (`workflow_dispatch`) with a `prod`/`staging` environment input — smoke
+  hits a live deploy with pre-issued secrets, so a broken token never blocks a merge.
+- Per-environment secrets via a ternary on `inputs.environment`.
+- Uploads driver artifacts (traces/screenshots) on failure.
+- The placeholder run step **fails loudly** until wired, so an empty smoke never reports
+  green.
+
+The smoke **specs themselves stay in the app** — this template only standardizes the
+button and shape.
 
 ## What stays per-repo (by design)
 

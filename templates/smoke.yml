@@ -1,0 +1,53 @@
+# Manual smoke run against a live environment. Copy to .github/workflows/smoke.yml and
+# fill in the two stack-specific blocks (setup + run). Intentionally manual-only: smoke
+# hits a real deploy with pre-issued secrets, so a broken token never blocks a merge.
+# The test SPECS live in the app — this is just the standard button + shape.
+# See docs/usage.md.
+name: Sector 7g - Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        required: true
+        default: prod
+        type: choice
+        options: [prod, staging]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Smoke (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      # --- Stack-specific: set up the runtime, install deps, install the test driver. ---
+      # Node + Playwright example:
+      # - uses: actions/setup-node@v6
+      #   with: { node-version: 24, cache: npm }
+      # - run: npm ci
+      # - run: npx playwright install --with-deps chromium
+
+      - name: Run smoke suite
+        # Replace with your stack's smoke command (Playwright, Capybara, curl checks…).
+        # Fails loudly until filled in, so an empty smoke never reports green.
+        run: |
+          echo "TODO: wire the smoke command"
+          exit 1
+        env:
+          # Pick per-environment secrets with a ternary on inputs.environment:
+          SMOKE_BASE_URL: ${{ inputs.environment == 'prod' && secrets.SMOKE_PROD_BASE_URL || secrets.SMOKE_STAGING_BASE_URL }}
+          # …add the URLs / tokens your smoke specs need, same prod/staging pattern.
+
+      - name: Upload artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: smoke-artifacts-${{ inputs.environment }}
+          path: test-results/ # point at your driver's output (traces, screenshots, logs)
+          retention-days: 7
