@@ -43,6 +43,41 @@ pinned and consistent. Keep stack-specific jobs (tests, lint, framework audits, 
 
 ---
 
+## Local development (`GETTING_STARTED.md`)
+
+Separate from the quality gate: standardize the "git clone → run locally in minutes" story
+so every repo has the same shape.
+
+The contract (each repo hits it in its own idiomatic way — don't force identical topology):
+
+1. **A `GETTING_STARTED.md` at the repo root** — the single canonical run-it doc. Copy
+   `templates/GETTING_STARTED.md`, keep the run paths that apply, fill the placeholders, and
+   **verify every command against the repo** (a documented path that doesn't run is the exact
+   failure this fixes). The README keeps only a short pointer to it; it links out to
+   architecture/vision docs, never duplicates them.
+2. **A one-command `bin/setup`** — JS/TS repos copy `templates/bin-setup`; Rails apps use the
+   framework's own `bin/setup` (ensure it runs `db:prepare`). The zero-toolchain path stays
+   `docker compose up`.
+3. **`.env.example` states the minimum** — the top comment separates must-have vars from
+   optional; if nothing is required, it says so. Mark prod-only secrets.
+
+```bash
+SECTOR=~/Workspace/rodacato/sector-7g
+cp "$SECTOR/templates/GETTING_STARTED.md" GETTING_STARTED.md   # then tailor + verify
+cp "$SECTOR/templates/bin-setup"          bin/setup && chmod +x bin/setup   # JS/TS only
+```
+
+### Local-dev status
+
+| Repo | GETTING_STARTED.md | bin/setup | README points to it |
+|---|---|---|---|
+| dojo | ☑ (#38) | ☐ (#39) | ☑ |
+| stockerly | ☑ (#238) | ☑ (Rails default) | ☑ |
+| drawhaus | ☑ (#100) | ☑ (#100) | ☑ |
+| mi-feria | ☐ | ☐ | ☐ |
+
+---
+
 ## Migration status
 
 | Repo | quality.yml | dependabot | sonar project | dropped dup scans |
