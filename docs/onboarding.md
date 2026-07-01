@@ -71,10 +71,10 @@ cp "$SECTOR/templates/bin-setup"          bin/setup && chmod +x bin/setup   # JS
 
 | Repo | GETTING_STARTED.md | bin/setup | README points to it |
 |---|---|---|---|
-| dojo | ☑ (#38) | ☐ (#39) | ☑ |
-| stockerly | ☑ (#238) | ☑ (Rails default) | ☑ |
-| drawhaus | ☑ (#100) | ☑ (#100) | ☑ |
-| mi-feria | ☐ | ☐ | ☐ |
+| dojo | ☑ | ☑ (#40) | ☑ |
+| stockerly | ☑ | ☑ (Rails default) | ☑ |
+| drawhaus | ☑ | ☑ | ☑ |
+| mi-feria | ☑ | — (Expo — `npm install` only; the real friction is Firebase + an EAS dev build, not scriptable) | ☑ |
 
 ---
 
