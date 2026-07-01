@@ -32,6 +32,15 @@ are an optional convenience that automates adoption; the flows work the same wit
 | `kamal-deploy` | One Kamal deploy step (Ruby + Kamal install, Buildx, ssh-agent, known_hosts, accessory boot/reboot, `kamal <action>`). Caller sets the app's `env:`; the action standardizes the steps. One config file per call | any (Kamal) |
 | `sentry-release` | Create a Sentry/GlitchTip release + mark the deploy. No-op without an auth token, so it's safe to call unconditionally. Not Kamal-specific | any |
 
+### Available — copy templates (local dev environment)
+| Template | Purpose | Stacks |
+|---|---|---|
+| `GETTING_STARTED.md` | Canonical "run it locally in minutes" doc skeleton | any |
+| `bin-setup` | One-command local setup script | JS/TS (Rails ships its own `bin/setup`) |
+
+Standardizes the "git clone → run locally" story. Copy + tailor per repo; details in
+[docs/onboarding.md](docs/onboarding.md#local-development-getting_startedmd).
+
 ### Planned
 - **`release`** — changelog / release tagging.
 

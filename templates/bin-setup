@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Sector 7-G template — one-command local setup for a Node/TS repo.
+# Copy to the app repo as `bin/setup` and `chmod +x bin/setup`, then tailor.
+# Rails apps: use the framework's own `bin/setup` (ensure it runs `db:prepare`) — this
+# skeleton is for JS/TS repos, which don't ship one.
+# The zero-toolchain path stays `docker compose up`; this covers bare metal.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+if [ ! -f .env ]; then
+  cp .env.example .env
+  echo "Created .env from .env.example"
+fi
+
+# Use the repo's package manager: npm ci / pnpm install --frozen-lockfile / etc.
+<PACKAGE_MANAGER_INSTALL>
+
+# Optional, only if the app needs an explicit schema/seed step on bare metal
+# (skip when the server migrates on boot):
+# <MIGRATE_COMMAND>
+# <SEED_COMMAND>
+
+echo
+echo "Setup complete. Start the app with:"
+echo "  docker compose up   # full stack incl. datastores (recommended)"
+echo "  <RUN_COMMAND>       # needs your own datastore(s) — see GETTING_STARTED.md"
