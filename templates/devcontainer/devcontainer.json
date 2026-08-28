@@ -1,0 +1,57 @@
+// Sector 7-G template — the standard Dev Container baseline.
+//
+// Copy to the app repo as .devcontainer/devcontainer.json, then tailor:
+//   - Fill every <PLACEHOLDER>.
+//   - Keep the "Sector 7-G baseline" features EXACTLY as they are — that block is the
+//     standard. Add the stack's own features below it; delete none of the baseline.
+//   - Replace the stack features/extensions with this repo's; delete the rest.
+//   - VERIFY the container builds and `claude`, `gh`, `rg`, `fd` all resolve before
+//     shipping. A devcontainer that doesn't open is worse than no devcontainer.
+//
+// devcontainer.json is JSONC — these comments are legal and can stay if useful.
+// Delete this header block when done.
+{
+  "name": "<APP>",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "<SERVICE_NAME>",
+  "workspaceFolder": "/workspaces/<APP>",
+
+  "features": {
+    // --- Sector 7-G baseline — identical in every repo, do not edit -------------
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/sshd:1": {},
+    "ghcr.io/stuartleeks/dev-container-features/shell-history:0": {},
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {},
+
+    // --- This repo's stack — replace with what applies -------------------------
+    "ghcr.io/devcontainers/features/node:1": { "version": "<NODE_MAJOR>" },
+    "ghcr.io/devcontainers/features/ruby:1": { "version": "<RUBY_VERSION>" },
+    "ghcr.io/rails/devcontainer/features/postgres-client": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+
+  "remoteUser": "vscode",
+  "updateRemoteUserUID": true,
+
+  "forwardPorts": [<APP_PORT>, <DB_PORT>],
+
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // Baseline — keep.
+        "anthropic.claude-code",
+        // This repo's stack — replace.
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "eamodio.gitlens"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "editor.formatOnSave": true
+      }
+    }
+  }
+}

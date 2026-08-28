@@ -1,0 +1,40 @@
+# Sector 7-G template — the compose half of the standard Dev Container.
+#
+# Copy to the app repo as .devcontainer/docker-compose.yml, then tailor:
+#   - Rename the workspace service to match `service` in devcontainer.json.
+#   - Keep `init: true` and the /dc/shellhistory volume — both are baseline.
+#   - Replace the datastore services with this repo's; delete the rest.
+# Delete this header block when done.
+services:
+  <SERVICE_NAME>:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    # tini as PID 1 — `sleep infinity` never reaps, so git/node/claude zombies pile up.
+    init: true
+    volumes:
+      - ..:/workspaces/<APP>:cached
+      # The shell-history feature writes to /dc/shellhistory (see its
+      # devcontainer-feature.json). Mount a named volume there or every rebuild
+      # starts with an empty history. The path is NOT /commandhistory — that one
+      # belongs to hand-rolled setups and silently persists nothing.
+      - commandhistory:/dc/shellhistory
+    command: sleep infinity
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: <APP>
+      POSTGRES_PASSWORD: <APP>
+      POSTGRES_DB: <APP>_dev
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "<DB_PORT>:5432"
+
+volumes:
+  postgres-data:
+  commandhistory:
