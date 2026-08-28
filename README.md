@@ -37,6 +37,7 @@ are an optional convenience that automates adoption; the flows work the same wit
 |---|---|---|
 | `GETTING_STARTED.md` | Canonical "run it locally in minutes" doc skeleton | any |
 | `bin-setup` | One-command local setup script | JS/TS (Rails ships its own `bin/setup`) |
+| `devcontainer/` | Dev Container baseline — shared features (incl. Claude Code + shell history), `init: true`, ripgrep/fd; plus the read-only-Kamal-in-the-container setup | any |
 
 Standardizes the "git clone → run locally" story. Copy + tailor per repo; details in
 [docs/onboarding.md](docs/onboarding.md#local-development-getting_startedmd).

@@ -60,21 +60,34 @@ The contract (each repo hits it in its own idiomatic way — don't force identic
    `docker compose up`.
 3. **`.env.example` states the minimum** — the top comment separates must-have vars from
    optional; if nothing is required, it says so. Mark prod-only secrets.
+4. **A `.devcontainer/` on the standard baseline** — the same five features (git,
+   github-cli, sshd, shell-history, claude-code), `init: true`, a volume at
+   `/dc/shellhistory`, and ripgrep/fd/neovim in the image. Everything else (base image,
+   ports, services, post-create body) is stack-specific and stays per-repo. Copy
+   `templates/devcontainer/` and work the checklist in its README — it also covers running
+   Kamal's read-only commands from the container without holding a secret.
 
 ```bash
 SECTOR=~/Workspace/rodacato/sector-7g
 cp "$SECTOR/templates/GETTING_STARTED.md" GETTING_STARTED.md   # then tailor + verify
 cp "$SECTOR/templates/bin-setup"          bin/setup && chmod +x bin/setup   # JS/TS only
+mkdir -p .devcontainer   # note: not `/*` — README.md is the checklist, not a file to copy
+cp "$SECTOR"/templates/devcontainer/{devcontainer.json,docker-compose.yml,Dockerfile,post-create.sh} .devcontainer/
+chmod +x .devcontainer/post-create.sh
+# then work the checklist: templates/devcontainer/README.md
 ```
 
 ### Local-dev status
 
-| Repo | GETTING_STARTED.md | bin/setup | README points to it |
-|---|---|---|---|
-| dojo | ☑ | ☑ (#40) | ☑ |
-| stockerly | ☑ | ☑ (Rails default) | ☑ |
-| drawhaus | ☑ | ☑ | ☑ |
-| mi-feria | ☑ | — (Expo — `npm install` only; the real friction is Firebase + an EAS dev build, not scriptable) | ☑ |
+| Repo | GETTING_STARTED.md | bin/setup | README points to it | devcontainer baseline |
+|---|---|---|---|---|
+| dojo | ☑ | ☑ (#40) | ☑ | ☑ |
+| stockerly | ☑ | ☑ (Rails default) | ☑ | ☑ |
+| drawhaus | ☑ | ☑ | ☑ | ☑ |
+| mi-feria | ☑ | — (Expo — `npm install` only; the real friction is Firebase + an EAS dev build, not scriptable) | ☑ | ☑ |
+
+The `devcontainer baseline` column tracks the five shared features + `init: true` +
+the `/dc/shellhistory` volume + ripgrep/fd, not the stack-specific half.
 
 ---
 
